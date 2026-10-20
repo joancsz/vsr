@@ -1,0 +1,23 @@
+# Python / Jupyter
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Suporte local ao desenvolvimento: geradores nbformat dos notebooks (ref/build_*.py),
+# proposta em PDF, plano de execução e cópias antigas. Os notebooks versionados são a fonte.
+ref/
+*.pdf
+
+# Dados: brutos (SIVEP-Gripe, SINASC), intermediários e saídas são reproduzíveis pelo pipeline
+# (01 → baixar_sinasc.py → 02…06); ver docs/METODOLOGIA.md §0.
+data/*
+*.part
+
+# Ambiente e editores
+.env
+.claude/settings.local.json
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
