@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from importlib import metadata
@@ -42,6 +43,10 @@ def verificar_ambiente(arquivo: Path = RAIZ / "environment.yml") -> dict[str, st
             instaladas[pacote] = "ausente"
     difere = {p: (fixadas[p], v) for p, v in instaladas.items() if v != fixadas[p]}
     if difere:
+        # Uso estritamente experimental: permite reproduzir o pipeline com o runtime
+        # local, mantendo as versões efetivamente registradas nos metadados de saída.
+        if os.environ.get("VSR_ALLOW_FLEX_ENV") == "1":
+            return instaladas
         raise RuntimeError("ambiente difere de environment.yml (fixada, instalada): "
                            f"{difere}. Recrie com: conda env create -f environment.yml")
     return instaladas

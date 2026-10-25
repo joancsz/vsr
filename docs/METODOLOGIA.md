@@ -46,6 +46,8 @@ Se nenhuma rota responder, usa-se `URLS_CONHECIDAS` (links fixos). Saídas manua
 
 **Cache.** Um arquivo existente, válido e com sha256 igual ao do manifesto anterior não é baixado de novo. O manifesto (`data/raw/SRAG/manifesto_download.json`) guarda origem, URL, bytes, sha256, data de publicação e `Last-Modified`. Se faltar algum ano de `anos_obrigatorios`, o pipeline **para**: semanas de anos ausentes nunca viram zero.
 
+**Snapshots reais.** A partir de 20/10/2026, `capturar_snapshot_srag.py` é o coletor operacional independente do notebook 01. Ele descobre a publicação vigente pelos mesmos três caminhos, preserva os anos mutáveis em `data/raw/snapshots/SRAG/<data>/<ano>/`, valida Parquet e acrescenta URL, hash, bytes e metadados HTTP a `manifesto_snapshots.jsonl`. A repetição de hash é registrada sem duplicar o arquivo; qualquer ano ausente aborta a captura. A rotina e os critérios de aceitação estão em `OPERACAO_SEMANAL.md`.
+
 **Ainda não integrados:** InfoGripe (referência de atraso), INMET (covariáveis opcionais), SINASC/IBGE (população < 2 anos, formato `uf, ano, pop_menores2`, ativado por `arquivo_populacao`).
 
 ---
@@ -391,6 +393,18 @@ Rodada de 20/10/2026: 03, 04 e 05 com `VSR_SERIE=srag` (triângulo, climatologia
 - O ranking se mantém (ensemble e LightGBM à frente; climatologia pior que o naive; `gamma_rw` melhor que o chain-ladder). O ganho relativo ao naive é menor em `srag`: a série é mais suave (soma de vírus), e o naive já acerta mais.
 - *Timing* em `srag`: erros menores (curva mais larga e estável), mas também sem vitória significativa sobre o naive. A conclusão de §12 não depende do alvo.
 - O fim só tem 12 pares em `srag` (temporadas completas com fim definido).
+
+---
+
+### 11.9 Segunda rodada exploratória local (20/10/2026; não integra a referência)
+
+O script `experimento_modelos_avancados.py` repetiu as 137 origens e h = 1--4 do §11.5 com duas especificações pré-definidas: `lgbm_sazonal` (lags de 13, 26 e 52 semanas, regularizado) e `poisson_painel` (efeitos fixos de UF e interação região × Fourier), ambas reconciliadas por bottom-up/Schaake. Também avaliou `ensemble_prequential`: média de quantis com pesos inversos ao WIS das últimas 52 origens, usando em cada origem somente alvos com pelo menos 26 semanas de maturação.
+
+Na validação 2024--2025, o `lgbm_sazonal` não supera o ensemble no Brasil (0,554 vs 0,550), é pior que o `lgbm_global` nas UFs (0,640 vs 0,592; diferença WIS log +0,0255 [0,0173; 0,0326]) e não deve substituí-lo. `poisson_painel` também perde em regiões e UFs. O ensemble online melhora regiões (0,533 vs 0,550 do ensemble fixo; cobertura 90% = 0,895), mas empata no Brasil com pior calibração (0,868 vs 0,966) e não vence o LightGBM nas UFs (0,600 vs 0,592). Portanto, a referência permanece ensemble fixo no Brasil, `lgbm_global` nas UFs; o ensemble online regional só avança após recalibração e snapshots reais. Relatório completo: `RESULTADOS_SEGUNDA_RODADA.md`.
+
+### 11.10 Terceira rodada: recalibração conformal online (20/10/2026; análise de sensibilidade)
+
+O `ensemble_prequential` foi recalibrado por *split conformal* na escala `log1p`, separadamente por origem, nível e horizonte. Cada intervalo central foi expandido com os escores das últimas 52 origens cujos alvos já haviam amadurecido há pelo menos 26 semanas; a mediana permaneceu inalterada. Nas regiões, a cobertura de 90% sobe de 0,895 para 0,914, mas o WIS relativo passa de 0,533 para 0,541. Contra o ensemble fixo (0,550), a diferença pareada de validação é -0,0045 [-0,0153; 0,0024], portanto inconclusiva. No Brasil, a recalibração piora o WIS (0,604), e nas UFs o `lgbm_global` (0,592) segue superior. A referência não muda: ensemble fixo no Brasil, `lgbm_global` nas UFs; o ensemble regional conformal é somente análise de sensibilidade até existir avaliação com snapshots reais. Relatório completo: `RESULTADOS_TERCEIRA_RODADA_CONFORMAL.md`.
 
 ---
 

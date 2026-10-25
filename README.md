@@ -38,6 +38,7 @@ Run in this order from the repository root (each notebook with `jupyter nbconver
 
 ```bash
 python baixar_sinasc.py                     # population (before 01)
+python capturar_snapshot_srag.py --anos 2025 2026  # weekly immutable SIVEP snapshots
 jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=-1 01_dados_srag_vsr.ipynb
 python validar_dados.py                     # optional external QC
 for nb in 02_eda 03_nowcasting 04_modelos 05_marcos 06_decisao; do
@@ -65,6 +66,7 @@ Seeds are fixed (`SEMENTE = 20261019` + origin index), so backtests are reproduc
 | Step | File | What it does | Main outputs (`data/processed/`) |
 |---|---|---|---|
 | 0 | `baixar_sinasc.py` | Downloads SINASC and builds the under-2 population by state and year | `data/external/populacao.csv` |
+| 0b | `capturar_snapshot_srag.py` | Preserves immutable weekly SIVEP-Gripe versions; does not rerun the pipeline | `data/raw/snapshots/SRAG/manifesto_snapshots.jsonl` |
 | 1 | `01_dados_srag_vsr.ipynb` | Downloads SIVEP-Gripe, filters cases, builds the weekly panel, delay triangle, completeness, climatology, state tiers, hierarchy and QC tables | `painel_semanal`, `triangulo_atraso`, `completude_atraso`, `climatologia`, `tiers_uf.csv`, `matriz_S.csv`, `qc_*.csv`, `metadata.json` |
 | 1c | `validar_dados.py` | 10 checks of the processed data against the raw files | `qc_validacao_externa.csv` |
 | 2 | `02_eda.ipynb` | Exploratory analysis; observed season milestones (truth) and alternative definitions (MEM, rate threshold) | `eda_marcos_temporada.parquet` |

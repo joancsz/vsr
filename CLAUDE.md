@@ -70,7 +70,7 @@ Módulos (cada um com autoteste em `__main__`, imprime `ok`):
   2. usar a previsão a partir de o − 1 como *prior* do nowcast de d = 0;
   3. *timing*: informação externa (vizinhos, outros vírus) ou mais temporadas; rever §14 com 2026 completa;
   4. decidir `vacina_materna_ini` (data de início da vacina materna);
-  5. download semanal de snapshots do OpenDataSUS (reconstrução real);
+  5. snapshots reais: coletor `capturar_snapshot_srag.py` e rotina em `OPERACAO_SEMANAL.md` criados em 20/10/2026; falta acumular uma temporada para a reconstrução real;
   6. confirmar no dicionário do SIVEP se `PCR_RESUL = 2` inclui testes só para SARS-CoV-2;
   7. sensibilidade `incluir_hospital_ausente = True` (outra `raiz`);
   8. resumo ISF ~mar/2027.

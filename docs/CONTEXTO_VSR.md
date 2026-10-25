@@ -171,3 +171,15 @@ versao = t.groupby(["uf", "semana"])["casos"].sum()
 - Comunicação concisa e direta, em português.
 - Saídas técnicas densas; Python de produção, modular, com notação matemática formal.
 - Sem enquadramento didático.
+
+## 8. Segunda rodada exploratória local (20/10/2026)
+
+Após a reprodução local da rodada de referência, foram avaliados em 137 origens os candidatos `lgbm_sazonal`, `poisson_painel` e `ensemble_prequential` (pesos só com alvos maduros na origem). Resultado: não há motivo para substituir o ensemble fixo no Brasil ou o LightGBM global nas UFs; o Poisson em painel perde em regiões/UFs e os lags sazonais longos pioram as UFs. O ensemble online é promissor apenas para regiões (WIS relativo 0,533 vs 0,550 do ensemble fixo), porém com cobertura 90% de 0,895 e sem snapshots reais; requer recalibração antes de qualquer adoção. Artefatos e ICs em `RESULTADOS_SEGUNDA_RODADA.md` e `data/processed/*experimento_avancado_v2*`.
+
+## 9. Terceira rodada: recalibração conformal (20/10/2026)
+
+Foi aplicada recalibração conformal online ao ensemble regional adaptativo, usando somente erros de previsões com alvos maduros na data de cada origem. A cobertura regional de 90% melhorou de 0,895 para 0,914, mas o WIS relativo foi de 0,533 para 0,541; frente ao ensemble fixo, o IC pareado de validação ainda inclui zero. Assim, a recalibração é uma análise de sensibilidade tecnicamente válida, não uma troca de referência. Brasil continua com ensemble fixo e UFs com `lgbm_global`. Artefatos e resultados detalhados: `RESULTADOS_TERCEIRA_RODADA_CONFORMAL.md`, `previsoes_ensemble_conformal_v1.parquet` e `avaliacao_ensemble_conformal_v1.parquet`.
+
+## 10. Operacionalização de snapshots (20/10/2026)
+
+Foi criado `capturar_snapshot_srag.py` para preservar semanalmente as versões reais do SIVEP-Gripe, sem alterar o painel ou o modelo na captura. A coleta usa descoberta redundante, download retomável, validação Parquet, SHA-256 e manifesto append-only; a rotina semanal e as regras de intervenção estão em `OPERACAO_SEMANAL.md`. A primeira captura, em 20/10/2026, registrou os arquivos 2025 e 2026 publicados em 19/10/2026. A escolha operacional atual permanece: ensemble fixo no Brasil e regiões, `lgbm_global` nas UFs. A avaliação definitiva do ensemble regional conformal depende do acúmulo desses snapshots.

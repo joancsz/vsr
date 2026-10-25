@@ -48,6 +48,8 @@ Ficha SIVEP-Gripe, com 194 campos (iguais em 2019–2026), um arquivo por ano ep
 
 Manifesto: `data/raw/SRAG/manifesto_download.json`, com uma entrada por ano (`ano`, `origem`, `url`, `arquivo`, `bytes`, `sha256`, `data_publicacao`, `last_modified_servidor`, `registrado_em_utc`).
 
+Snapshots reais: `data/raw/snapshots/SRAG/manifesto_snapshots.jsonl`, uma linha imutável por ano e data de captura, com `acao`, `ano`, `arquivo`, `bytes`, `data_captura`, `data_publicacao`, `etag`, `last_modified_servidor`, `registrado_em_utc`, `sha256` e `url`. Quando o hash já existe, `arquivo` referencia a cópia anterior e `acao = referencia_hash_existente`.
+
 ---
 
 ## 2. `data/interim/casos_menores2.parquet`: base limpa
@@ -201,6 +203,10 @@ Saídas do `04_modelos` (METODOLOGIA §11), critério residência, `00-23m`, alv
 | `q0.01` … `q0.99` | 23 quantis da distribuição preditiva (contagens semanais) |
 
 **`avaliacao_backtest.parquet`**: as mesmas chaves (sem os quantis), restritas a alvos avaliáveis (temporadas 2024–2026, sem `semana_incompleta`).
+
+**Saídas exploratórias locais da segunda rodada** (não sobrescrevem a rodada de referência): `previsoes_experimento_avancado_v2.parquet` contém os quantis de `lgbm_sazonal` e `poisson_painel`, nas mesmas colunas e chaves de `previsoes_backtest.parquet`, somente para `h = 1..4`. `avaliacao_experimento_avancado_v2.parquet` reúne essas previsões, quatro modelos de referência e `ensemble_prequential`, com o esquema de `avaliacao_backtest.parquet`. `pesos_ensemble_prequential_v2.parquet` contém `origem`, `nivel`, `h`, `modelo`, `peso` e `n_historico_maduro`; os pesos são usados apenas na análise exploratória.
+
+**Saídas exploratórias locais da terceira rodada** (não sobrescrevem a rodada de referência): `previsoes_ensemble_prequential_v2.parquet` guarda a reconstrução do ensemble online; `previsoes_ensemble_conformal_v1.parquet` contém a mesma previsão com intervalos recalibrados; e `avaliacao_ensemble_conformal_v1.parquet` reúne `naive_sazonal`, o ensemble online e sua versão conformal. Todas mantêm as chaves e os quantis de `previsoes_backtest.parquet`, para `h = 1..4`.
 
 | Coluna | Descrição |
 |---|---|
